@@ -12,10 +12,13 @@ object Assignment1 extends App {
   val pagecounts = sc.textFile("/home/shivansh/Documents/pagecounts-20151201-220000")
   pagecounts.persist(StorageLevel.MEMORY_AND_DISK)
   val tenRecords = pagecounts.take(10)
+  println(s"tenRecords:${tenRecords.mkString(",")}")
   val count = pagecounts.count()
+  println(s"count:$count")
   val lineRDD = pagecounts.map(_.split(" "))
   val englishPages = lineRDD.filter(a => a(0).toLowerCase == "en")
   val englishPagesCount = englishPages.count
-  val hitsPairRDD = lineRDD.map(a => (a(1), a(2).toDouble)).reduceByKey(_ + _).filter(a => a._2 > 200000)
-  println(s"chitsPairRDD:${hitsPairRDD.count}")
+  println(s"englishPageCount:$englishPagesCount")
+  val hitsPairRDD = lineRDD.map(a => (a(1), a(2).toDouble)).groupByKey().mapValues(a => a.reduce(_ + _)).filter(a => a._2 > 200000)
+  println(s"hitsPairRDD:${hitsPairRDD.collect.mkString(",")}")
 }
